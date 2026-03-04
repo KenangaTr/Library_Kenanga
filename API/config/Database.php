@@ -1,55 +1,47 @@
 <?php
 
 /**
- * Database Connection Class (Singleton Pattern)
+ * Class Database
  *
- * Provides a single shared PDO instance for all API classes,
- * reusing the same credentials as the existing application config.
+ * Mengelola koneksi ke database MySQL menggunakan PDO.
+ * Menyimpan kredensial sebagai properti class dan
+ * menyediakan method getConnection() untuk membuat koneksi.
  */
 class Database
 {
-    private static ?Database $instance = null;
-    private PDO $connection;
+    // ── Kredensial Database ────────────────────────────────────────────────────
+    private string $host     = "localhost";
+    private string $db_name  = "library_db";
+    private string $username = "root";
+    private string $password = "";
+    private string $charset  = "utf8mb4";
 
-    private string $host     = 'localhost';
-    private string $dbName   = 'library_db';
-    private string $username = 'root';
-    private string $password = '';
-    private string $charset  = 'utf8mb4';
-
-    private function __construct()
-    {
-        $dsn = "mysql:host={$this->host};dbname={$this->dbName};charset={$this->charset}";
-
-        $options = [
-            PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
-            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-            PDO::ATTR_EMULATE_PREPARES   => false,
-        ];
-
-        $this->connection = new PDO($dsn, $this->username, $this->password, $options);
-    }
+    // ── Objek koneksi PDO ──────────────────────────────────────────────────────
+    private ?PDO $conn = null;
 
     /**
-     * Get the singleton instance of Database.
+     * Membuat dan mengembalikan objek koneksi PDO.
+     * Jika koneksi sudah ada, koneksi yang sama dikembalikan.
+     *
+     * @return PDO|null  Objek PDO jika koneksi berhasil, null jika gagal.
      */
-    public static function getInstance(): Database
+    public function getConnection(): ?PDO
     {
-        if (self::$instance === null) {
-            self::$instance = new self();
+        if ($this->conn !== null) {
+            return $this->conn;
         }
-        return self::$instance;
-    }
 
-    /**
-     * Return the active PDO connection.
-     */
-    public function getConnection(): PDO
-    {
-        return $this->connection;
-    }
+        $dsn = "mysql:host={$this->host};dbname={$this->db_name};charset={$this->charset}";
 
-    // Prevent cloning and unserialization
-    private function __clone() {}
-    public function __wakeup() {}
+        try {
+            $this->conn = new PDO($dsn, $this->username, $this->password);
+            $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            $this->conn->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            // Kembalikan null agar endpoint bisa mengembalikan 503
+            $this->conn = null;
+        }
+
+        return $this->conn;
+    }
 }
