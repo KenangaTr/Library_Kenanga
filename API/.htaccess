@@ -1,0 +1,8 @@
+Options -Indexes
+
+# Route every request through index.php so clean URLs work
+# e.g. /API/books/3 → /API/index.php (with URI preserved)
+RewriteEngine On
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ index.php [QSA,L]

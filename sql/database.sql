@@ -17,3 +17,12 @@ INSERT INTO books (title, author, published_year, isbn, stock) VALUES
 ('1984', 'George Orwell', 1949, '9780451524935', 8),
 ('Pride and Prejudice', 'Jane Austen', 1813, '9780141439518', 4),
 ('The Catcher in the Rye', 'J.D. Salinger', 1951, '9780316769480', 6);
+
+CREATE TABLE admins (
+    id INT(11) NOT NULL AUTO_INCREMENT,
+    nama_lengkap VARCHAR(100) NOT NULL,
+    username VARCHAR(50) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
